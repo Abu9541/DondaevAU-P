@@ -1,0 +1,256 @@
+# binary_search_tree.py
+
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Optional
+
+
+@dataclass
+class TreeNode:
+    """Узел бинарного дерева поиска.
+
+    Атрибуты:
+        value: Значение, хранящееся в узле.
+        left: Ссылка на левое поддерево.
+        right: Ссылка на правое поддерево.
+    """
+
+    value: int  # O(1)
+    left: Optional["TreeNode"] = None
+    right: Optional["TreeNode"] = None
+
+
+class BinarySearchTree:
+    """Класс бинарного дерева поиска (BST)."""
+
+    def __init__(self) -> None:
+        """Создает пустое дерево.
+
+        Время: O(1)
+        Память: O(1)
+        """
+        self.root: Optional[TreeNode] = None  # O(1)
+
+    def insert(self, value: int) -> None:
+        """Вставка значения в дерево (итеративная реализация).
+
+        Средняя сложность: O(log n).
+        Худшая (вырожденное дерево): O(n).
+        """
+        # Если дерево пустое — создаем корень. O(1)
+        if self.root is None:
+            self.root = TreeNode(value)  # O(1)
+            return  # O(1)
+
+        current = self.root  # O(1)
+        while True:  # O(h)
+            if value < current.value:  # O(1)
+                if current.left is None:  # O(1)
+                    current.left = TreeNode(value)  # O(1)
+                    return  # O(1)
+                current = current.left  # O(1)
+            elif value > current.value:  # O(1)
+                if current.right is None:  # O(1)
+                    current.right = TreeNode(value)  # O(1)
+                    return  # O(1)
+                current = current.right  # O(1)
+            else:
+                # Дубликаты не вставляем. O(1)
+                return  # O(1)
+
+    def search(self, value: int) -> Optional[TreeNode]:
+        """Поиск узла со значением value (итеративная реализация).
+
+        Средняя сложность: O(log n).
+        Худшая: O(n).
+        """
+        current = self.root  # O(1)
+        while current is not None:  # O(h)
+            if value == current.value:  # O(1)
+                return current  # O(1)
+            if value < current.value:  # O(1)
+                current = current.left  # O(1)
+            else:
+                current = current.right  # O(1)
+        return None  # O(1)
+
+    def delete(self, value: int) -> None:
+        """Удаление узла со значением value.
+
+        Средняя сложность: O(log n).
+        Худшая: O(n).
+        """
+        # Перестраиваем дерево с учетом удаления. O(h)
+        self.root = self._delete_recursive(self.root, value)  # O(h)
+
+    def _delete_recursive(
+        self,
+        node: Optional[TreeNode],
+        value: int,
+    ) -> Optional[TreeNode]:
+        """Рекурсивное удаление узла из поддерева.
+
+        Обрабатывает три случая:
+        - удаление листа;
+        - удаление узла с одним потомком;
+        - удаление узла с двумя потомками.
+
+        Сложность: O(h).
+        """
+        if node is None:  # O(1)
+            return None  # O(1)
+
+        if value < node.value:  # O(1)
+            # Удаляем в левом поддереве. O(h)
+            node.left = self._delete_recursive(node.left, value)  # O(h)
+        elif value > node.value:  # O(1)
+            # Удаляем в правом поддереве. O(h)
+            node.right = self._delete_recursive(node.right, value)  # O(h)
+        else:
+            # Нашли удаляемый узел. O(1)
+            if node.left is None and node.right is None:  # O(1)
+                # Случай листа. O(1)
+                return None  # O(1)
+
+            if node.left is None:  # O(1)
+                # Один правый потомок. O(1)
+                return node.right  # O(1)
+
+            if node.right is None:  # O(1)
+                # Один левый потомок. O(1)
+                return node.left  # O(1)
+
+            # Два потомка: ищем минимальный элемент в правом поддереве. O(h)
+            successor = self.find_min(node.right)  # O(h)
+            assert successor is not None  # O(1)
+            node.value = successor.value  # O(1)
+
+            # Удаляем узел-последователь из правого поддерева. O(h)
+            node.right = self._delete_recursive(node.right, successor.value)
+            # O(h)
+
+        return node  # O(1)
+
+    def find_min(self, node: Optional[TreeNode]) -> Optional[TreeNode]:
+        """Поиск минимального значения в поддереве.
+
+        Сложность: O(h).
+        """
+        current = node  # O(1)
+        while current is not None and current.left is not None:  # O(h)
+            current = current.left  # O(1)
+        return current  # O(1)
+
+    def find_max(self, node: Optional[TreeNode]) -> Optional[TreeNode]:
+        """Поиск максимального значения в поддереве.
+
+        Сложность: O(h).
+        """
+        current = node  # O(1)
+        while current is not None and current.right is not None:  # O(h)
+            current = current.right  # O(1)
+        return current  # O(1)
+
+    def height(self, node: Optional[TreeNode] = None) -> int:
+        """Вычисление высоты дерева (итеративно).
+
+        Высота пустого дерева = 0.
+        Сложность: O(n) по времени, O(h) по памяти.
+        """
+        # Если явно передан узел — считаем высоту поддерева с этим корнем.
+        root = node if node is not None else self.root  # O(1)
+        if root is None:  # O(1)
+            return 0  # O(1)
+
+        max_height = 0  # O(1)
+        stack: list[tuple[TreeNode, int]] = [(root, 1)]  # O(1)
+
+        while stack:  # O(n)
+            current, h = stack.pop()  # O(1)
+            if h > max_height:  # O(1)
+                max_height = h  # O(1)
+            if current.left is not None:  # O(1)
+                stack.append((current.left, h + 1))  # O(1)
+            if current.right is not None:  # O(1)
+                stack.append((current.right, h + 1))  # O(1)
+
+        return max_height  # O(1)
+
+    def is_valid_bst(self) -> bool:
+        """Проверка, что дерево удовлетворяет свойству BST.
+
+        Сложность: O(n), каждый узел посещается один раз.
+        """
+
+        def _validate(
+            node: Optional[TreeNode],
+            min_value: Optional[int],
+            max_value: Optional[int],
+        ) -> bool:
+            if node is None:  # O(1)
+                return True  # O(1)
+
+            # Проверяем границы:
+            # левый потомок строго меньше, правый строго больше. O(1)
+            if (min_value is not None and node.value <= min_value) or (
+                max_value is not None and node.value >= max_value
+            ):
+                return False  # O(1)
+
+            # Рекурсивно проверяем левое и правое поддеревья. O(n)
+            left_ok = _validate(node.left, min_value, node.value)  # O(n_left)
+            right_ok = _validate(node.right, node.value, max_value)
+            # O(n_right)
+            return left_ok and right_ok  # O(1)
+
+        return _validate(self.root, None, None)  # O(n)
+
+    def visualize(self) -> None:
+        """Печатает дерево в виде "ёлочки" в консоль.
+
+        Использует отступы и псевдографику для отображения структуры.
+
+        Сложность: O(n), каждый узел выводится один раз.
+        """
+
+        def _visualize(
+            node: Optional[TreeNode],
+            prefix: str,
+            is_left: bool,
+        ) -> None:
+            if node is None:  # O(1)
+                return  # O(1)
+
+            # Определяем символ ветки. O(1)
+            branch = "├── " if is_left else "└── "  # O(1)
+            print(prefix + branch + str(node.value))  # O(1)
+
+            # Префикс для потомков. O(1)
+            child_prefix = prefix + ("│   " if is_left else "    ")  # O(1)
+
+            # Рекурсивно выводим левое и правое поддерево. O(n)
+            if node.left is not None or node.right is not None:  # O(1)
+                _visualize(node.left, child_prefix, True)  # O(n_left)
+                _visualize(node.right, child_prefix, False)  # O(n_right)
+
+        if self.root is None:  # O(1)
+            print("<пустое дерево>")  # O(1)
+            return  # O(1)
+
+        _visualize(self.root, "", True)  # O(n)
+
+
+def build_bst_from_iterable(values: list[int]) -> BinarySearchTree:
+    """Вспомогательная функция для построения BST из списка значений.
+
+    Каждый элемент поочередно вставляется в дерево.
+
+    Средняя сложность: O(n log n).
+    Худшая (вырожденный случай): O(n²).
+    """
+    tree = BinarySearchTree()  # O(1)
+    for value in values:  # O(n)
+        tree.insert(value)  # O(h)
+    return tree  # O(1)

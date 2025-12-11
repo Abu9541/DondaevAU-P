@@ -86,7 +86,7 @@ def plot_performance_comparison(sizes: List[int], times_naive: List[float],
     plt.legend()  # O(1)
     plt.yscale('log')  # O(1) - логарифмическая шкала для наглядности
 
-    plt.savefig('img_1.png', dpi=300,  # O(1)
+    plt.savefig('tests.png', dpi=300,  # O(1)
                 bbox_inches='tight')  # O(1)
     plt.show()  # O(1)
 

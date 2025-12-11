@@ -344,7 +344,7 @@ def plot_performance_results(sizes: List[int],
     plt.legend()
 
     plt.tight_layout()
-    plt.savefig('img_1.png', dpi=300, bbox_inches='tight')
+    plt.savefig('tests.png', dpi=300, bbox_inches='tight')
     plt.show()
 
 # task_solutions.py
