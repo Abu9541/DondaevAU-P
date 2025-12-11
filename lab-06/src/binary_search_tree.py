@@ -77,61 +77,60 @@ class BinarySearchTree:
         return None  # O(1)
 
     def delete(self, value: int) -> None:
-        """Удаление узла со значением value.
+        """Итеративное удаление узла со значением value.
 
-        Средняя сложность: O(log n).
-        Худшая: O(n).
+        Сложность: O(h), где h — высота дерева (O(log n) в среднем,
+        O(n) в худшем).
         """
-        # Перестраиваем дерево с учетом удаления. O(h)
-        self.root = self._delete_recursive(self.root, value)  # O(h)
+        parent: Optional[TreeNode] = None  # Родитель текущего узла. O(1)
+        current: Optional[TreeNode] = self.root  # Текущий узел. O(1)
 
-    def _delete_recursive(
-        self,
-        node: Optional[TreeNode],
-        value: int,
-    ) -> Optional[TreeNode]:
-        """Рекурсивное удаление узла из поддерева.
+        while current is not None and current.value != value:  # O(h)
+            parent = current  # O(1)
+            if value < current.value:  # O(1)
+                current = current.left  # O(1)
+            else:
+                current = current.right  # O(1)
 
-        Обрабатывает три случая:
-        - удаление листа;
-        - удаление узла с одним потомком;
-        - удаление узла с двумя потомками.
+        if current is None:
+            return  # O(1)
 
-        Сложность: O(h).
-        """
-        if node is None:  # O(1)
-            return None  # O(1)
+        def replace_child(
+            parent_node: Optional[TreeNode],
+            old_child: Optional[TreeNode],
+            new_child: Optional[TreeNode],
+        ) -> None:
+            if parent_node is None:
+                self.root = new_child  # O(1)
+            elif parent_node.left is old_child:
+                parent_node.left = new_child  # O(1)
+            else:
+                parent_node.right = new_child  # O(1)
 
-        if value < node.value:  # O(1)
-            # Удаляем в левом поддереве. O(h)
-            node.left = self._delete_recursive(node.left, value)  # O(h)
-        elif value > node.value:  # O(1)
-            # Удаляем в правом поддереве. O(h)
-            node.right = self._delete_recursive(node.right, value)  # O(h)
+        if current.left is None and current.right is None:
+            replace_child(parent, current, None)  # O(1)
+            return  # O(1)
+
+        if current.left is None or current.right is None:
+            child = current.left if current.left is not None else current.right
+            # O(1)
+            replace_child(parent, current, child)  # O(1)
+            return  # O(1)
+
+        succ_parent = current  # O(1)
+        succ = current.right  # O(1)
+        while succ.left is not None:  # O(h)
+            succ_parent = succ  # O(1)
+            succ = succ.left  # O(1)
+
+        current.value = succ.value  # O(1)
+
+        succ_child = succ.right  # O(1)
+
+        if succ_parent.left is succ:
+            succ_parent.left = succ_child  # O(1)
         else:
-            # Нашли удаляемый узел. O(1)
-            if node.left is None and node.right is None:  # O(1)
-                # Случай листа. O(1)
-                return None  # O(1)
-
-            if node.left is None:  # O(1)
-                # Один правый потомок. O(1)
-                return node.right  # O(1)
-
-            if node.right is None:  # O(1)
-                # Один левый потомок. O(1)
-                return node.left  # O(1)
-
-            # Два потомка: ищем минимальный элемент в правом поддереве. O(h)
-            successor = self.find_min(node.right)  # O(h)
-            assert successor is not None  # O(1)
-            node.value = successor.value  # O(1)
-
-            # Удаляем узел-последователь из правого поддерева. O(h)
-            node.right = self._delete_recursive(node.right, successor.value)
-            # O(h)
-
-        return node  # O(1)
+            succ_parent.right = succ_child  # O(1)
 
     def find_min(self, node: Optional[TreeNode]) -> Optional[TreeNode]:
         """Поиск минимального значения в поддереве.
