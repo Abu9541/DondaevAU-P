@@ -689,7 +689,7 @@ def is_connected_undirected(graph: TGraph) -> bool:
 ## Результаты выполнения
 
 ### Пример работы программы
-Вывод файла comparison.py:  
+Вывод файла analysis.py.py:  
 ```bash
 Характеристики ПК для тестирования:
 - Процессор: Intel Core i7-13620H @ 2.40GHz
